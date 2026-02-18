@@ -1011,30 +1011,30 @@
 
         // ... (INITIAL data remains the same) ...
         const INITIAL = {
-            regCapital: 12000000,
+            regCapital: 13000000,
             loan: { amount: 0, rate: 5, term: 5 },
-            maxCapacity: 30000, 
-            capex: { factory: 7000000, machine: 1300000, license: 200000, stock: 1000000 },
-            depreciation: { factoryYears: 20, machineYears: 10 }, 
-            targetBags: 20000, price: 389,
+            maxCapacity: 700000, 
+            capex: { factory: 7000000, machine: 1300000, license: 200000, stock: 2000000 },
+            depreciation: { factoryYears: 20, machineYears: 5 }, 
+            targetBags: 15000, price: 389,
             creditTerm: 0, 
-            yield: 60, paddyPrice: 12000,
+            yield: 60, paddyPrice: 16000,
             byProducts: [
                 { id: "prod_husk", name: "แกลบ", percent: 23, price: 1500 },
                 { id: "prod_fine", name: "รำละเอียด", percent: 10, price: 9000 },
                 { id: "prod_rough", name: "รำหยาบ", percent: 2, price: 9000 },
-                { id: "prod_broken", name: "ข้าวหัก", percent: 2, price: 14000 },
+                { id: "prod_broken", name: "ข้าวหัก", percent: 2, price: 12000 },
                 { id: "prod_waste", name: "ของเสีย", percent: 1, price: 0 },
             ],
-            unit: { bag: 6.5, sticker: 2.0 },
+            unit: { bag: 10, sticker: 13 },
             hr: [
-                { role: "CEO/MD", count: 1, salary: 50000 },
-                { role: "Plant Manager", count: 1, salary: 35000 },
-                { role: "Production Staff", count: 4, salary: 15000 },
-                { role: "Admin/Account", count: 1, salary: 20000 },
-                { role: "Sales/Marketing", count: 2, salary: 17775 }
+                { role: "CEO/MD", count: 1, salary: 30000 },
+                { role: "Plant Manager", count: 1, salary: 30000 },
+                { role: "Production Staff", count: 5, salary: 14000 },
+                { role: "Admin/Account", count: 1, salary: 14000 },
+                { role: "Sales/Marketing", count: 2, salary: 14000 }
             ],
-            varParams: { elecRate: 600, mktPercent: 14, platformPercent: 12, returnRate: 1 },
+            varParams: { elecRate: 550, mktPercent: 15, platformPercent: 12, returnRate: 0.5 },
             fixedParams: { erp: 9000, campaign: 41000, other: 10000, maintPercent: 2, insurance: 60000, audit: 5000, travel: 10000 },
             campaignDetails: [
                 { id: "camp_gold1", name: "ลุ้นทอง 1 สลึง", qty: 1, costPerUnit: 16500 },
@@ -1603,7 +1603,7 @@
                     }
                 };
                 
-                const maxCapacity = data.maxCapacity || 30000;
+                const maxCapacity = data.maxCapacity || 70000;
                 const utilizationPct = (data.targetBags / maxCapacity) * 100;
                 const fixedCostPerUnit = data.targetBags > 0 ? fixedCashTotal / data.targetBags : 0;
                 const varCostPerUnitDisplay = data.targetBags > 0 ? (totalVar - totalVatOut) / data.targetBags : 0;
@@ -1674,9 +1674,9 @@
                 const scenarios = ['worst', 'base', 'best'];
                 return scenarios.map(type => {
                     let sData = JSON.parse(JSON.stringify(d)); 
-                    if (type === 'worst') { sData.targetBags = 14000; sData.paddyPrice = 13500; sData.growth = 0; sData.varParams.mktPercent = 18; } 
-                    else if (type === 'base') { sData.targetBags = 20000; sData.paddyPrice = 12000; sData.growth = 10; sData.varParams.mktPercent = 14; } 
-                    else if (type === 'best') { sData.targetBags = 25000; sData.paddyPrice = 11500; sData.growth = 15; sData.varParams.mktPercent = 12; }
+                    if (type === 'worst') { sData.targetBags = 8000; sData.paddyPrice = 18000; sData.growth = 0; sData.varParams.mktPercent = 20; } 
+                    else if (type === 'base') { sData.targetBags = 15000; sData.paddyPrice = 16000; sData.growth = 10; sData.varParams.mktPercent = 15; } 
+                    else if (type === 'best') { sData.targetBags = 20000; sData.paddyPrice = 15000; sData.growth = 15; sData.varParams.mktPercent = 13; }
                     const res = calculateFinancials(sData);
                     return { type, netProfit: res.netProfit, cashFinal: res.cfTotal.cashFinal };
                 });
@@ -2965,3 +2965,4 @@
     </script>
 </body>
 </html>
+
