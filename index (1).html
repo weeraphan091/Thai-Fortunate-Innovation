@@ -1013,10 +1013,11 @@
         const INITIAL = {
             regCapital: 13000000,
             loan: { amount: 0, rate: 5, term: 5 },
-            maxCapacity: 700000, 
+            maxCapacity: 70000, 
             capex: { factory: 7000000, machine: 1300000, license: 200000, stock: 2000000 },
-            depreciation: { factoryYears: 20, machineYears: 5 }, 
-            targetBags: 15000, price: 389,
+            depreciation: { factoryYears: 20, machineYears: 10 }, 
+            targetBags: 15000, 
+            price: 389,
             creditTerm: 0, 
             yield: 60, paddyPrice: 16000,
             byProducts: [
@@ -1026,7 +1027,7 @@
                 { id: "prod_broken", name: "ข้าวหัก", percent: 2, price: 12000 },
                 { id: "prod_waste", name: "ของเสีย", percent: 1, price: 0 },
             ],
-            unit: { bag: 10, sticker: 13 },
+            unit: { bag: 10.0, sticker: 13.0 },
             hr: [
                 { role: "CEO/MD", count: 1, salary: 30000 },
                 { role: "Plant Manager", count: 1, salary: 30000 },
@@ -1041,7 +1042,7 @@
                 { id: "camp_gold2", name: "ลุ้นทอง ครึ่งสลึง", qty: 2, costPerUnit: 8500 },
                 { id: "camp_free", name: "กินข้าวฟรี 1 ปี", qty: 3, costPerUnit: 2500 }
             ],
-            logistics: { active: true, percent: 50, profit: 5 },
+            logistics: { active: true, percent: 100, profit: 3 },
             dividend: { payout: 50, founders: 3 },
             growth: 10, inflation: 3, monthlyGrowth: 0, discountRate: 10,
             mktFunnel: { basketSize: 1.0, cvr: 2.0, ctr: 1.5 },
@@ -1210,9 +1211,24 @@
 
             const applyScenario = (type) => {
                 let newData = { ...d, scenario: type };
-                if (type === 'worst') { newData.targetBags = 14000; newData.paddyPrice = 13500; newData.growth = 0; newData.varParams.mktPercent = 18; } 
-                else if (type === 'base') { newData.targetBags = 20000; newData.paddyPrice = 12000; newData.growth = 10; newData.varParams.mktPercent = 14; } 
-                else if (type === 'best') { newData.targetBags = 25000; newData.paddyPrice = 11500; newData.growth = 15; newData.varParams.mktPercent = 12; }
+                if (type === 'worst') { 
+                    newData.targetBags = 8000; 
+                    newData.paddyPrice = 18000; 
+                    newData.growth = 0; 
+                    newData.varParams.mktPercent = 20; 
+                } 
+                else if (type === 'base') { 
+                    newData.targetBags = 15000; 
+                    newData.paddyPrice = 16000; 
+                    newData.growth = 10; 
+                    newData.varParams.mktPercent = 15; 
+                } 
+                else if (type === 'best') { 
+                    newData.targetBags = 20000; 
+                    newData.paddyPrice = 15000; 
+                    newData.growth = 15; 
+                    newData.varParams.mktPercent = 13; 
+                }
                 setD(newData);
                 setActiveSim(null); 
                 setBackupD(null);
@@ -1369,9 +1385,14 @@
                 const aov = basketSize * data.price;
                 const retention = clvP.retention / 100;
                 const ltv1 = (aov * clvP.freq * grossMarginPct); 
-                const ltv3 = ltv1 * 3; 
+                
+                // FIX: Calculate LTV 3 Years based on Retention decay (Geometric Series for 3 terms)
+                // Year 1: 1.0, Year 2: retention, Year 3: retention^2
+                const ltv3 = ltv1 * (1 + retention + Math.pow(retention, 2)); 
+                
                 const churn = 1 - retention;
-                const lifetimeValue = churn > 0 ? (ltv1 / churn) : 0; 
+                // FIX: Handle infinite LTV if retention is 100%
+                const lifetimeValue = churn > 0.001 ? (ltv1 / churn) : (ltv1 * 50); 
                 const ltvCac = cpa > 0 ? lifetimeValue / cpa : 0;
 
                 const elasticityData = [];
@@ -1404,7 +1425,10 @@
                     acos: acos, 
                     gmv: riceRev,
                     beRoas: beRoasVal,
-                    ltv1, ltv3, ltvCac, lifetimeValue
+                    ltv1, 
+                    ltv3, 
+                    ltvCacRatio: ltvCac, // FIX: Mapped correctly to UI variable
+                    lifetimeValue
                 };
 
                 const accruedRev = [];
@@ -1603,7 +1627,7 @@
                     }
                 };
                 
-                const maxCapacity = data.maxCapacity || 70000;
+                const maxCapacity = data.maxCapacity || 30000;
                 const utilizationPct = (data.targetBags / maxCapacity) * 100;
                 const fixedCostPerUnit = data.targetBags > 0 ? fixedCashTotal / data.targetBags : 0;
                 const varCostPerUnitDisplay = data.targetBags > 0 ? (totalVar - totalVatOut) / data.targetBags : 0;
@@ -1674,9 +1698,24 @@
                 const scenarios = ['worst', 'base', 'best'];
                 return scenarios.map(type => {
                     let sData = JSON.parse(JSON.stringify(d)); 
-                    if (type === 'worst') { sData.targetBags = 8000; sData.paddyPrice = 18000; sData.growth = 0; sData.varParams.mktPercent = 20; } 
-                    else if (type === 'base') { sData.targetBags = 15000; sData.paddyPrice = 16000; sData.growth = 10; sData.varParams.mktPercent = 15; } 
-                    else if (type === 'best') { sData.targetBags = 20000; sData.paddyPrice = 15000; sData.growth = 15; sData.varParams.mktPercent = 13; }
+                    if (type === 'worst') { 
+                        sData.targetBags = 8000; 
+                        sData.paddyPrice = 18000; 
+                        sData.growth = 0; 
+                        sData.varParams.mktPercent = 20; 
+                    } 
+                    else if (type === 'base') { 
+                        sData.targetBags = 15000; 
+                        sData.paddyPrice = 16000; 
+                        sData.growth = 10; 
+                        sData.varParams.mktPercent = 15; 
+                    } 
+                    else if (type === 'best') { 
+                        sData.targetBags = 20000; 
+                        sData.paddyPrice = 15000; 
+                        sData.growth = 15; 
+                        sData.varParams.mktPercent = 13; 
+                    }
                     const res = calculateFinancials(sData);
                     return { type, netProfit: res.netProfit, cashFinal: res.cfTotal.cashFinal };
                 });
@@ -2965,4 +3004,3 @@
     </script>
 </body>
 </html>
-
